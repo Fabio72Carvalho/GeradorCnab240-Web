@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador Cnab240</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+        }
+
+        form {
+            padding: 8px;
+        }
+
+        form input {
+            margin-bottom: 14px;
+        }
+
+        .section {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            padding: 10px;
+        }
+
+        .toggle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            background-color: #0078d7;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .toggle-header:hover {
+            background-color: #005a9e;
+        }
+
+        .toggle-icon {
+            font-size: 18px;
+            margin-left: 10px;
+        }
+
+        .content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+
+        .content.open {
+            max-height: 500px;
+        }
+
+        .btn-acao {
+            padding: 6px 12px;
+            font-size: 12px;
+            border: none;
+            border-radius: 4px;
+            background-color: #0078D4;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-acao:hover {
+            background-color: #005A9E;
+        }
+
+        .botoes-salvar-importar {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        #inputPgdr {
+            display: none;
+        }
+
+        #inputTransf {
+            display: none;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        .scroll-container {
+            overflow-x: auto;
+            max-width: 100%;
+        }
+
+        thead {
+            background-color: gray;
+            color: white;
+        }
+
+        thead th {
+            border-right: 1px solid white;
+            padding: 8px;
+        }
+
+        #tab-transf {
+            min-width: 1500px;
+            table-layout: fixed;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #tab-transf td {
+            padding: 4px;
+            border: 1px solid #ccc;
+        }
+
+        #tab-transf td input {
+            width: 100%;
+            box-sizing: border-box;
+            font-size: medium;
+            height: 22px;
+        }
+
+        #tab-transf td select {
+            width: 100%;
+            box-sizing: border-box;
+            font-size: small;
+            height: 22px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            margin: 10px 0;
+        }
+
+        .checkbox-group label {
+            font-weight: bold;
+            background-color: #f0f0f0;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 6px;
+        }
+
+        .checkbox-group label:hover {
+            background-color: #e0e0e0;
+        }
+
+        .validation-icon {
+            font-size: 1.2em;
+            color: green;
+        }
+
+        .toggle-label {
+            font-weight: bold;
+        }
+
+        #btnGravarRemessa {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-left: 16px;
+        }
+
+        #btnGravarRemessa:hover {
+            background-color: #0056b3;
+            transform: scale(1.03);
+        }
+
+        #btnGravarRemessa:active {
+            background-color: #004494;
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Gerador Cnab240</h1>
+    <!--SEÇÃO: PAGADOR-->
+    <div class="section" id="pgdrSection">
+        <div class="toggle-header" onclick="toggleExclusive(this)">
+            <span class="toggle-label">
+                Dados do Pagador
+                <span class="validation-icon1" id="validation-icon1"> </span>
+            </span>
+            <span class="toggle-icon">➕</span>
+        </div>
+        <div class="content">
+            <form id="formulario">
+                <label>Nome: </label> <input id="inpNmPgdr" type="text" size="30"
+                    placeholder="Nome do pagador (opcional)" maxlength="30"
+                    oninput="this.value = this.value.toUpperCase()"><br>
+                <label>Tipo de pessoa:</label>
+                <select id="inpTpPgdr" style="margin-right: 25px;">
+                    <option value="2">Jurídica</option>
+                    <option value="1">Física</option>
+                </select>
+                <label>CPF/CNPJ:</label> <input type="text" id="inpCpfCnpjPgdr" maxlength="14" size="14" placeholder="*"
+                    oninput="this.value = this.value.toUpperCase()" style="text-align: center"><br>
+                <label style="margin-right: 6px;">Nº do contrato no PGT:</label><input id="inpNrCtrPgto" type="text"
+                    size="9" placeholder="*" maxlength="9" style="text-align: center;"><br>
+                <label style="margin-right: 6px;">Nº da agência:</label><input id="inpNrAgPgdr" type="text" size="4"
+                    placeholder="*" maxlength="5" style="text-align: center;">
+                <label style="margin-right: 6px;" oninput="this.value = this.value.toUpperCase()">DV da
+                    agência:</label><input id="inpDvAgPgdr" type="text" placeholder="*" maxlength="1"
+                    style="width: 16px; text-align: center;"><br>
+                <label style="margin-right: 6px;">Nº da conta:</label><input id="inpNrCtaPgdr" type="text" size="6"
+                    placeholder="*" maxlength="9" style="text-align: center;">
+                <label style="margin-right: 6px;" oninput="this.value = this.value.toUpperCase()">DV da
+                    conta:</label><input id="inpDvCtaPgdr" type="text" placeholder="*" maxlength="1"
+                    style="width: 16px; text-align: center;">
+            </form>
+            <p id="avisoCampos" style="display: none; color: red;">* campos obrigatórios</p>
+            <div class="botoes-salvar-importar">
+                <button id="btnImpPgdr" class="btn-acao" onclick="lerDadosPgdr()">📂 Importar</button>
+                <input type="file" id="inputPgdr" accept=".json">
+                <button id="btnSalvarPgdr" class="btn-acao" onclick="salvarDadosPgdr()">💾 Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!--SEÇÃO: TRANSFERÊNCIAS-->
+    <div class="section" id="transfSection">
+        <div class="toggle-header" onclick="toggleExclusive(this)">
+            <span class="toggle-label">
+                Transferências
+                <span class="validation-icon2" id="validation-icon2"> </span>
+            </span>
+            <span class="toggle-icon">➕</span>
+        </div>
+        <div class="content">
+            <div class="checkbox-group">
+                <label style="font-size: 12px;">
+                    <input type="checkbox" id="transf-128" onchange="handleCheckboxChange(event)">
+                    Diversos (128)
+                </label>
+                <label style="font-size: 12px;">
+                    <input type="checkbox" id="transf-127" onchange="handleCheckboxChange(event)">
+                    Salário (127)
+                </label>
+                <label style="font-size: 12px;">
+                    <input type="checkbox" id="transf-126" onchange="handleCheckboxChange(event)">
+                    Fornecedores (126)
+                </label>
+            </div>
+            <div class="scroll-container">
+                <table id="tab-transf" style="font-size: smaller;">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">Pix?</th>
+                            <th style="width: 5%;">Salário?</th>
+                            <th style="width: 8%;">Data pagamento</th>
+                            <th style="width: 8%;">Valor</th>
+                            <th style="width: 6%;">Tipo Conta</th>
+                            <th style="width: 6%;">Cd.COMPE</th>
+                            <th style="width: 6%;">Cd.ISPB</th>
+                            <th style="width: 5%;">Nº Ag. Fav.</th>
+                            <th style="width: 3%;">DV</th>
+                            <th style="width: 7%;">Nº Conta Fav.</th>
+                            <th style="width: 3%;">DV</th>
+                            <th style="width: 5%;">Tipo Fav.</th>
+                            <th style="width: 7%;">CPF/CNPJ Fav.</th>
+                            <th style="width: 10%;">Nome Fav.(opcional)</th>
+                            <th style="width: 6%;">Nº documento</th>
+                            <th style="width: 10%;">Chave Pix</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Linhas serão adicionadas aqui -->
+                    </tbody>
+                </table>
+            </div>
+            <button onclick="adicionarLinha()" style="margin-top: 18px; margin-right: 12px;">➕ Adicionar linha</button>
+            <button onclick="excluirLinha()" style="margin-right: 12px;">🗑️ Excluir linha atual</button>
+            <button onclick="salvarTransf()" style="margin-right: 12px;">💾 Salvar</button>
+            <button id="btnImpTransf" onclick="impTransf()" style="margin-right: 12px;">📥 Importar</button>
+            <input type="file" id="inputTransf" accept=".json">
+            <button onclick="limparTransf()">🧹 Limpar</button>
+        </div>
+    </div>
+
+    <!--SEÇÃO: TÍTULOS-->
+    <div class="section" id="titSection">
+        <div class="toggle-header" onclick="toggleExclusive(this)">
+            <span class="toggle-label">
+                Títulos (em desenvolvimento)
+                <span class="validation-icon3" id="validation-icon3"> </span>
+            </span>
+            <span class="toggle-icon">➕</span>
+        </div>
+        <div class="content">
+            <div class="checkbox-group">
+                <label style="font-size: 12px;">
+                    <input type="checkbox" id="pix-128" onchange="handleCheckboxChange(event)">
+                    Diversos (128)
+                </label>
+                <label style="font-size: 12px;">
+                    <input type="checkbox" id="pix-127" onchange="handleCheckboxChange(event)">
+                    Salário (127)
+                </label>
+                <label style="font-size: 12px;">
+                    <input type="checkbox" id="pix-126" onchange="handleCheckboxChange(event)">
+                    Fornecedores (126)
+                </label>
+            </div>
+            <div class="scroll-container">
+                <table id="tab-pix" style="font-size: smaller;">
+                    <thead>
+                        <tr>
+                            <th style="width: 8%;">Tipo Pgto.</th>
+                            <th style="width: 7%;">Pix?</th>
+                            <th style="width: 8%;">Nº Ag. Fav.</th>
+                            <th style="width: 3%;">DV</th>
+                            <th style="width: 10%;">Nº Conta Fav.</th>
+                            <th style="width: 3%;">DV</th>
+                            <th style="width: 14%;">Nome Fav.(opcional)</th>
+                            <th style="width: 10%;">Nº doc.atrib. empresa</th>
+                            <th style="width: 9%;">Data do pagamento</th>
+                            <th style="width: 9%;">Valor do pagamento</th>
+                            <th style="width: 6%;">Tipo Fav.</th>
+                            <th style="width: 13%;">Nº CPF/CNPJ Fav.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Linhas serão adicionadas aqui -->
+                    </tbody>
+                </table>
+                <!-- TODO <button onclick="adicionarLinha()" style="margin-top: 18px;">➕ Adicionar linha</button>-->
+            </div>
+        </div>
+    </div>
+
+    <button id="btnGravarRemessa" onclick="gravarRemessa()">💾 Gravar Remessa</button>
+
+    <script>
+        let ultimoCampoAtivo = null;
+        // Leitura de dados do cache
+        const dadosSalvos = JSON.parse(localStorage.getItem('dadosPgdr'));
+        if (dadosSalvos) {
+            let campo = document.getElementById("inpNmPgdr")
+            campo.value = dadosSalvos.nmPgdr
+            campo = document.getElementById("inpTpPgdr")
+            campo.value = dadosSalvos.tpPgdr
+            campo = document.getElementById("inpCpfCnpjPgdr")
+            campo.value = dadosSalvos.cpfCnpjPgdr
+            campo = document.getElementById("inpNrCtrPgto")
+            campo.value = dadosSalvos.nrCtrPgto
+            campo = document.getElementById("inpNrAgPgdr")
+            campo.value = dadosSalvos.nrAgPgdr
+            campo = document.getElementById("inpDvAgPgdr")
+            campo.value = dadosSalvos.dvAgPgdr
+            campo = document.getElementById("inpNrCtaPgdr")
+            campo.value = dadosSalvos.nrCtaPgdr
+            campo = document.getElementById("inpDvCtaPgdr")
+            campo.value = dadosSalvos.dvCtaPgdr
+        }
+        // Listener do botão Importar (pagador)
+        btnImpPgdr.addEventListener("click", () => {
+            inputPgdr.style.display = "block";
+        });
+        // Listener do botão Importar (transferências)
+        btnImpTransf.addEventListener("click", () => {
+            inputTransf.style.display = "block";
+        });
+        // Botão Gravar Remessa
+        function gravarRemessa() {
+            let ok = true;
+            let cntValidados = 0;
+            let arrayPrdTransf = {
+                126: false,
+                127: false,
+                128: false
+            };
+            // Verifica modalidade/produtos marcados para gerar arquivo
+            let marcado = document.getElementById('transf-126').checked;
+            if (marcado) { arrayPrdTransf[126] = true; }
+            marcado = document.getElementById('transf-127').checked;
+            if (marcado) { arrayPrdTransf[127] = true; }
+            marcado = document.getElementById('transf-128').checked;
+            if (marcado) { arrayPrdTransf[128] = true; }
+            // Faz validações
+            if (arrayPrdTransf[126] || arrayPrdTransf[127] || arrayPrdTransf[128]) {
+                if (validarFormPgdr()) {     // Validações dos dados do PAGADOR
+                    if (arrayPrdTransf[126] && arrayPrdTransf[128]) {
+                        ok = false;
+                        alerta("Marque somente um: 'Transferências/Fornecedores' ou 'Transferências/Diversos'");
+                    }
+                    let resultadoValidacao = validarTransf() // Validações TRANSFERÊNCIAS
+                    if (resultadoValidacao === "") {
+                        ok = true
+                        cntValidados += 1
+                    } else {
+                        ok = false;
+                        alerta(resultadoValidacao);
+                    }
+                } else {
+                    alerta("Problema na validação do pagador! Verifique.");
+                    ok = false;
+                }
+            } else {
+                alerta("Marque pelo menos um produto de uma das modalidades.");
+                ok = false;
+            }
+            ok = cntValidados > 0 ? true : false;
+            // Se tudo 'Ok', gera e grava o arquivo
+            if (ok) {
+                const dataAtual = new Date();
+                const dataBrasil = new Date(dataAtual.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+                const doisDigitos = (num) => String(num).padStart(2, '0');
+                const ano = dataBrasil.getFullYear();
+                const mes = doisDigitos(dataBrasil.getMonth() + 1);
+                const dia = doisDigitos(dataBrasil.getDate());
+                const hora = doisDigitos(dataBrasil.getHours());
+                const minuto = doisDigitos(dataBrasil.getMinutes());
+                const segundo = doisDigitos(dataBrasil.getSeconds());
+                const dataFormatada = `${ano}-${mes}-${dia}_${hora}h${minuto}m${segundo}s`;
+                const resultOfTexto = gerarArquivo(arrayPrdTransf);                      // GERA ARQUIVO
+                gravarArquivo(resultOfTexto, ("Remessa-" + dataFormatada)) // GRAVA ARQUIVO
+            }
+        }
+        //
+        function gerarArquivo(arrayPrdTransf) {
+            const dadosPgdr = {
+                nmPgdr: document.getElementById('inpNmPgdr').value.trim().toUpperCase(),
+                tpPgdr: document.getElementById('inpTpPgdr').value.trim(),
+                cpfCnpjPgdr: document.getElementById('inpCpfCnpjPgdr').value.trim().toUpperCase(),
+                nrCtrPgto: document.getElementById('inpNrCtrPgto').value.trim(),
+                nrAgPgdr: document.getElementById('inpNrAgPgdr').value.trim(),
+                dvAgPgdr: document.getElementById('inpDvAgPgdr').value.trim().toUpperCase(),
+                nrCtaPgdr: document.getElementById('inpNrCtaPgdr').value.trim(),
+                dvCtaPgdr: document.getElementById('inpDvCtaPgdr').value.trim().toUpperCase(),
+            };
+            // HEADER DO ARQUIVO
+            let conteudoDoArquivo = headerArquivo(dadosPgdr) + "\n";
+            // LOTES
+            const dados = extrairDadosTabela()
+            let seqlLote = 0;
+            // ### LOTE CRÉD.CC BB ###
+            if (sessionStorage.getItem("cntContaCorrenteBB") > 0) {
+                seqlLote += 1;
+                let seqlRegLt = 0;
+                let vlrTtlLt = 0;
+                let codModalArq = arrayPrdTransf[126] ? 2001 : 9801
+                conteudoDoArquivo += headerLote(codModalArq, seqlLote, dadosPgdr) + "\n"; // HEADER DO LOTE
+                dados.forEach((lnh, i) => {                  // LINHAS DETALHE
+                    if (!arrayPrdTransf[127] && Number(lnh.coluna1) == 1 && Number(lnh.coluna0 == 0)) {
+                        if (lnh.coluna4.length < 9 || (lnh.coluna4.length == 9 && Number(lnh.coluna4.substring(0, 2)) <= 9)) {
+                            seqlRegLt += 1
+                            conteudoDoArquivo += segmentosAeB(seqlLote, seqlRegLt, codModalArq, lnh);
+                            vlrTtlLt += parseFloat(lnh.coluna9);
+                        }
+                    }
+                });
+                conteudoDoArquivo += trailerLote((seqlRegLt + 1), vlrTtlLt, 1) + "\n"; // TRAILER DO LOTE
+            }
+            // ### LOTE POUPANÇA BB ###
+            if (sessionStorage.getItem("cntPoupancaBB") > 0) {
+                seqlLote += 1;
+                let seqlRegLt = 0;
+                let vlrTtlLt = 0;
+                let codModalArq = arrayPrdTransf[126] ? 2005 : 9805
+                conteudoDoArquivo += headerLote(codModalArq, seqlLote, dadosPgdr) + "\n"; // HEADER DO LOTE
+                dados.forEach((lnh, i) => {                  // LINHAS DETALHE
+                    if (Number(lnh.coluna1) == 1) {
+                        if (lnh.coluna4.length == 9 && Number(lnh.coluna4.substring(0, 2) > 9)) {
+                            seqlRegLt += 1
+                            conteudoDoArquivo += segmentosAeB(seqlLote, seqlRegLt, codModalArq, lnh);
+                            vlrTtlLt += parseFloat(lnh.coluna9);
+                        }
+                    }
+                });
+                conteudoDoArquivo += trailerLote((seqlRegLt + 1), vlrTtlLt, 1) + "\n"; // TRAILER DO LOTE
+            }
+            // ### LOTE TED ###
+            if (sessionStorage.getItem("cntTed") > 0) {
+                seqlLote += 1;
+                let seqlRegLt = 0;
+                let vlrTtlLt = 0;
+                let codModalArq = arrayPrdTransf[126] ? 2003 : 9803
+                conteudoDoArquivo += headerLote(codModalArq, seqlLote, dadosPgdr) + "\n"; // HEADER DO LOTE
+                dados.forEach((lnh, i) => {                  // LINHAS DETALHE
+                    if (Number(lnh.coluna1) != 1) {
+                        seqlRegLt += 1
+                        conteudoDoArquivo += segmentosAeB(seqlLote, seqlRegLt, codModalArq, lnh);
+                        vlrTtlLt += parseFloat(lnh.coluna9);
+                    }
+                });
+                conteudoDoArquivo += trailerLote((seqlRegLt + 1), vlrTtlLt, 1) + "\n"; // TRAILER DO LOTE
+            }
+            // ### LOTE SALÁRIO ###
+            if (sessionStorage.getItem("cntSalario") && arrayPrdTransf[127]) {
+                seqlLote += 1;
+                let seqlRegLt = 0;
+                let vlrTtlLt = 0;
+                let codModalArq = 3001
+                conteudoDoArquivo += headerLote(codModalArq, seqlLote, dadosPgdr) + "\n"; // HEADER DO LOTE
+                dados.forEach((lnh, i) => {                  // LINHAS DETALHE
+                    if (Number(lnhcoluna0 == 1)) { // Salário
+                        seqlRegLt += 1
+                        conteudoDoArquivo += segmentosAeB(seqlLote, seqlRegLt, codModalArq, lnh);
+                        vlrTtlLt += parseFloat(lnh.coluna9);
+                    }
+                });
+                conteudoDoArquivo += trailerLote((seqlRegLt + 1), vlrTtlLt, 1) + "\n"; // TRAILER DO LOTE
+            }
+            conteudoDoArquivo += trailerArquivo(5, 1); // TRAILER DO ARQUIVO
+            return conteudoDoArquivo
+        }
+        // Gravar arquivo txt
+        function gravarArquivo(texto, nomeArquivo) {
+            const blob = new Blob([texto], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = nomeArquivo + ".txt";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url); // Limpa o objeto da memória
+        }
+        // Importar dados do pagador
+        function lerDadosPgdr() {
+            const input = document.getElementById('inputPgdr');
+            const arquivo = input.files[0];
+            if (!arquivo) {
+                //alert("Selecione um arquivo JSON.");
+                return;
+            }
+            const leitor = new FileReader();
+            leitor.onload = function (e) {
+                try {
+                    const conteudo = JSON.parse(e.target.result);
+                    dados = Array.isArray(conteudo) ? conteudo : [conteudo];
+                    dados.forEach((obj, index) => {
+                        let campo = document.getElementById("inpNmPgdr")
+                        campo.value = obj.nmPgdr
+                        campo = document.getElementById("inpTpPgdr")
+                        campo.value = obj.tpPgdr
+                        campo = document.getElementById("inpCpfCnpjPgdr")
+                        campo.value = obj.cpfCnpjPgdr
+                        campo = document.getElementById("inpNrCtrPgto")
+                        campo.value = obj.nrCtrPgdr
+                        campo = document.getElementById("inpNrAgPgdr")
+                        campo.value = obj.nrAgPgdr
+                        campo = document.getElementById("inpDvAgPgdr")
+                        campo.value = obj.dvAgPgdr
+                        campo = document.getElementById("inpNrCtaPgdr")
+                        campo.value = obj.nrCtaPgdr
+                        campo = document.getElementById("inpDvCtaPgdr")
+                        campo.value = obj.dvCtaPgdr
+                    });
+                } catch (erro) {
+                    alert("Erro ao ler o JSON: " + erro.message);
+                }
+            };
+            leitor.readAsText(arquivo);
+        }
+        // Salva os dados do pagador
+        function salvarDadosPgdr() {
+            if (!validarFormPgdr()) { return false } // Validações Dados Pgdr. e grava na localStorage
+            const dadosPgdr = {
+                nmPgdr: limparTexto(document.getElementById('inpNmPgdr').value.trim().toUpperCase()),
+                tpPgdr: document.getElementById('inpTpPgdr').value.trim(),
+                cpfCnpjPgdr: document.getElementById('inpCpfCnpjPgdr').value.trim().toUpperCase(),
+                nrCtrPgto: document.getElementById('inpNrCtrPgto').value.trim(),
+                nrAgPgdr: document.getElementById('inpNrAgPgdr').value.trim(),
+                dvAgPgdr: document.getElementById('inpDvAgPgdr').value.trim().toUpperCase(),
+                nrCtaPgdr: document.getElementById('inpNrCtaPgdr').value.trim(),
+                dvCtaPgdr: document.getElementById('inpDvCtaPgdr').value.trim().toUpperCase(),
+            };
+            // Gera o arquivo JSON para download
+            const blob = new Blob([JSON.stringify(dadosPgdr, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'dados_pagador.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        // Salva transferências
+        function salvarTransf() {
+            let dados = null;
+            // TODO let msg = validarTransf();
+            let msg = "";
+            console.log("msg:::::::::::: " + msg)
+            if (msg == "") {
+                dados = extrairDadosTabela();
+            } else {
+                alerta(msg);
+            }
+            if (dados) {
+                // Gera o arquivo JSON para download
+                try {
+                    const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'transferencias.json';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    alert("Transferências salvas com sucesso!")
+                } catch (e) {
+                    console.warn("Erro ao salvar transferências: ", e);
+                }
+            } else {
+                console.warn("Erro ao salvar transferências!")
+            }
+        }
+        // Importar transferências
+        function lerTransf() {
+            const input = document.getElementById('inputTransf');
+            const arquivo = input.files[0];
+            if (!arquivo) {
+                //alert("Selecione um arquivo JSON.");
+                return;
+            }
+            const leitor = new FileReader();
+            leitor.onload = function (e) {
+                try {
+                    const conteudo = JSON.parse(e.target.result);
+                    dados = Array.isArray(conteudo) ? conteudo : [conteudo];
+                    dados.forEach((obj, index) => {
+                        adicionarLinha(obj);
+                    });
+                } catch (erro) {
+                    alert("Erro ao ler o JSON TRANSF: " + erro.message);
+                }
+            };
+            leitor.readAsText(arquivo);
+        }
+        // Validar os dados do pagador e se tudo ok, salva em cache (localStorage)
+        function validarFormPgdr() {
+            const validationIcon = document.getElementById('validation-icon1');
+            validationIcon.textContent = '❌';
+            validationIcon.style.color = 'red';
+            if (campoVazioFormPgdr()) {
+                alerta("Complete os dados do pagador para prosseguir.")
+                return false;
+            }
+            const dadosPgdr = {
+                nmPgdr: limparTexto(document.getElementById('inpNmPgdr').value.trim().toUpperCase()),
+                tpPgdr: document.getElementById('inpTpPgdr').value.trim(),
+                cpfCnpjPgdr: document.getElementById('inpCpfCnpjPgdr').value.trim().toUpperCase(),
+                nrCtrPgto: document.getElementById('inpNrCtrPgto').value.trim(),
+                nrAgPgdr: document.getElementById('inpNrAgPgdr').value.trim(),
+                dvAgPgdr: document.getElementById('inpDvAgPgdr').value.trim().toUpperCase(),
+                nrCtaPgdr: document.getElementById('inpNrCtaPgdr').value.trim(),
+                dvCtaPgdr: document.getElementById('inpDvCtaPgdr').value.trim().toUpperCase(),
+            };
+            if (dadosPgdr.nmPgdr.length == 0) {
+                dadosPgdr.nmPgdr = "NOME PAGADOR"
+            };
+            if (dadosPgdr.cpfCnpjPgdr.length < 3) {
+                alerta("CPF/CNPJ do pagador inválido.");
+                return false;
+            } else {
+                if (!validarCpfCnpj(dadosPgdr.tpPgdr, dadosPgdr.cpfCnpjPgdr)) {
+                    alerta("CPF/CNPJ do pagador inválido.");
+                    return false;
+                }
+            }
+            if (isNaN(dadosPgdr.nrCtrPgto)) {
+                alerta("Nº contrato de pagamento inválido.");
+                return false;
+            }
+            if (isNaN(dadosPgdr.nrAgPgdr)) {
+                alerta("Nº agência do pagador inválido.");
+                return false;
+            }
+            if (!validarDV(2, dadosPgdr.nrAgPgdr, dadosPgdr.dvAgPgdr)) {
+                alerta("DV agência do pagador inválido.");
+                return false;
+            }
+            if (isNaN(dadosPgdr.nrCtaPgdr)) {
+                alerta("Nº conta do pagador inválido.");
+                return false;
+            }
+            if (!validarDV(2, dadosPgdr.nrCtaPgdr, dadosPgdr.dvCtaPgdr)) {
+                alerta("DV conta do pagador inválido.");
+                return false;
+            }
+            localStorage.setItem('dadosPgdr', JSON.stringify(dadosPgdr)); // Salva no localStorage
+            validationIcon.textContent = '✔️';
+            validationIcon.style.color = 'green';
+            return true
+        }
+        //
+        function campoVazioFormPgdr() {
+            const camposObrigatorios = ['inpTpPgdr', 'inpTpPgdr', 'inpCpfCnpjPgdr', 'inpNrCtrPgto', 'inpNrAgPgdr', 'inpDvAgPgdr', 'inpNrCtaPgdr', 'inpDvCtaPgdr'];
+            let algumVazio = false;
+            camposObrigatorios.forEach(id => {
+                const valor = document.getElementById(id).value.trim();
+                if (valor === "") {
+                    algumVazio = true;
+                }
+            });
+            const aviso = document.getElementById('avisoCampos');
+            if (algumVazio) {
+                aviso.style.display = 'block';
+            } else {
+                aviso.style.display = 'none';
+            }
+            return algumVazio;
+        }
+        //
+        function alerta(msg) {
+            alert(`⚠️ Atenção!\n\n${msg}`);
+        }
+        //
+        function headerArquivo(dadosPgdr) {
+            let txtLinha = "00100000         ";
+            txtLinha += dadosPgdr.tpPgdr;
+            txtLinha += zerosEsquerda(dadosPgdr.cpfCnpjPgdr, 14);
+            txtLinha += zerosEsquerda(dadosPgdr.nrCtrPgto, 9);
+            txtLinha += "0126       ";
+            txtLinha += zerosEsquerda(dadosPgdr.nrAgPgdr, 5);
+            txtLinha += dadosPgdr.dvAgPgdr;
+            txtLinha += zerosEsquerda(dadosPgdr.nrCtaPgdr, 12);
+            txtLinha += dadosPgdr.dvCtaPgdr;
+            txtLinha += "0";
+            txtLinha += (String(limparTexto(dadosPgdr.nmPgdr)) + "                              ").substring(0, 30);
+            txtLinha += "BANCO DO BRASIL               ";
+            txtLinha += "          1";
+            const dataGeracao = dadosPgdr.dataGeracao instanceof Date ? dadosPgdr.dataGeracao : formatarDataDDMMAAAA(new Date());
+            txtLinha += dataGeracao;
+            txtLinha += "000000000000";
+            txtLinha += "00000000";
+            txtLinha += "                    ";
+            txtLinha += "                    ";
+            txtLinha += "              000000000000000";
+            return txtLinha;
+        }
+        //
+        function trailerArquivo(ttlRegArq, qtLotes) {
+            let txtLinha = "";
+            txtLinha += "00199999         ";
+            txtLinha += zerosEsquerda(qtLotes, 6);
+            txtLinha += zerosEsquerda(ttlRegArq + 1, 6);
+            txtLinha += "000000";
+            txtLinha += "                                                  ".repeat(4);
+            txtLinha += "     ";
+            return txtLinha;
+        }
+        //
+        function headerLote(modalidade, seqlLote, dadosPgdr) {
+            seqlLote += 1;
+            let txtLinha = "";
+            txtLinha += "001"; // Campo fixo: nº do banco
+            txtLinha += zerosEsquerda(seqlLote, 4); // Sequencial do lote
+            txtLinha += "1C"; // Tipo de registro + tipo de operação
+            txtLinha += String(modalidade); // Tipo de Serviço + Forma de lançamento
+            txtLinha += "000 "; // Versão do leiaute + uso exclusivo CNAB
+            txtLinha += dadosPgdr.tpPgdr; // Tipo de inscrição do convenente
+            txtLinha += zerosEsquerda(dadosPgdr.cpfCnpjPgdr, 14); // Nº de inscrição do convenente
+            txtLinha += zerosEsquerda(dadosPgdr.nrCtrPgto, 9); // Nº do contrato do convenente
+            txtLinha += "0126       "; // Código + uso reservado do banco
+            txtLinha += zerosEsquerda(dadosPgdr.nrAgPgdr, 5); // Agência do convenente
+            txtLinha += String(dadosPgdr.dvAgPgdr).toUpperCase(); // DV da agência
+            txtLinha += zerosEsquerda(dadosPgdr.nrCtaPgdr, 12); // Conta do convenente
+            txtLinha += String(dadosPgdr.dvCtaPgdr).toUpperCase(); // DV da conta
+            txtLinha += "0"; // DV agência+conta
+            txtLinha += String(limparTexto(dadosPgdr.nmPgdr)).toUpperCase().padEnd(30).substring(0, 30); // Nome do convenente
+            txtLinha += " ".repeat(40); // Uso exclusivo BB
+            txtLinha += " ".repeat(30) + "00000" + " ".repeat(35) + "00000" + " ".repeat(13) + "0000000000"; // Endereço + uso CNAB + ocorrências
+            return txtLinha;
+        }
+        //
+        function trailerLote(qtRegLote, valorTotalLote, seqlLote) {
+            let txtLinha = ""; // Nº do banco
+            txtLinha += "001"; // Nº do lote de serviço
+            txtLinha += zerosEsquerda(seqlLote, 4); // Tipo de registro + uso exclusivo CNAB
+            txtLinha += "5         "; // Quantidade de registros do lote (inclui header e trailer)
+            txtLinha += zerosEsquerda(qtRegLote + 2, 6); // Valor total dos pagamentos
+            txtLinha += zerosEsquerda(String(valorTotalLote).replace(/[.,]/g, ""), 18); // Somatório quantidade de moedas + nº aviso de débito
+            txtLinha += "000000000000000000000000"; // Uso exclusivo CNAB
+            txtLinha += "                                                  ".repeat(3);
+            txtLinha += "               ";
+            txtLinha += "0000000000"; // Ocorrências
+            return txtLinha;
+        }
+        //
+        function segmentosAeB(seqlLote, seqlReg, modalidade, lnh) {
+            let txtLinha = "001"; // Nº do banco
+            txtLinha += zerosEsquerda(seqlLote, 4); // Nº do lote
+            txtLinha += "3"; // Tipo de registro
+            txtLinha += zerosEsquerda(seqlReg, 5); // Sequencial
+            txtLinha += "A000"; // Segmento + tipo movimento + instrução
+            let codCamara = "";
+            let pix = false;
+            switch (modalidade) {
+                case 9801: codCamara = "000"; break;
+                case 9803: codCamara = "018"; break;
+                case 9805: codCamara = "000"; break;
+                case 9845: codCamara = "009"; pix = true; break;
+                case 3001: codCamara = "000"; break;
+                default: throw new Error("Erro interno. Modalidade inválida!!");
+            }
+            txtLinha += codCamara;
+            if (!pix) {     //  TODO || (pix && dados.tipoIniciacaoPix === 5)) {
+                txtLinha += zerosEsquerda(lnh.coluna1.trim(), 3); // Cód.Bco.
+                txtLinha += zerosEsquerda(lnh.coluna2.trim(), 5); // Ag.
+                txtLinha += lnh.coluna3.trim().toUpperCase();     // DV ag.
+                txtLinha += zerosEsquerda(lnh.coluna4.trim(), 12); // Conta
+                txtLinha += lnh.coluna5.trim().toUpperCase();      // DV conta
+                txtLinha += " ";
+            } else {
+                txtLinha += space(23);
+            }
+            let nome = lnh.coluna6?.trim().toUpperCase() || ""; // Nome fav.
+            if (nome.length === 0) {
+                nome = `NOME FAVORECIDO-${Math.floor((seqlReg + 1) / 2)}`;
+            }
+            txtLinha += nome.padEnd(30, ' ').substring(0, 30);
+            let numeroDoc = lnh.coluna7?.trim() || ""; // Nr.documento
+            txtLinha += numeroDoc.padStart(20, ' ').substring(0, 20);
+            const dataPgto = lnh.coluna8 instanceof Date ? lnh.coluna8 : formatarDataDDMMAAAA(new Date());
+            txtLinha += dataPgto;
+            txtLinha += "BRL000000000000000";
+            txtLinha += zerosEsquerda(lnh.coluna9.replace(/[.,]/g, ""), 15); // Valor do pagamento
+            txtLinha += " ".repeat(43); // Campos retorno
+            txtLinha += " ".repeat(40); // Outras informações
+            txtLinha += "  "; // Finalidade DOC
+            txtLinha += "     "; // Finalidade TED
+            txtLinha += "     00000000000\n"; // Finalidade pgto + uso Febraban
+            // SEGMENTO B (início)
+            txtLinha += '001';     // FIXO nº do banco (1 a 3)
+            txtLinha += zerosEsquerda(seqlLote, 4);     // Nº do lote (4 a 7)
+            txtLinha += '3';     // Tipo de registro (8)
+            txtLinha += zerosEsquerda(seqlReg, 5);     // Sequencial do Registro (9 a 13)
+            txtLinha += 'B';     // Segmento + exclusivo CNAB (14 a 17)
+            if (modalidade === 9845) {     // Modalidade Pix
+                //txtLinha += zerosEsquerda(dadosTransferencias[linha][14], 3);
+            } else {
+                txtLinha += '   ';
+            }
+            txtLinha += lnh.coluna10.toString(); // Tipo de inscrição do favorecido (18)
+            txtLinha += zerosEsquerda(lnh.coluna11, 14) // Nº de inscrição do favorecido (19 a 32)
+            /**if (modalidade === 9845) {
+                const tipoIniciacao = dadosTransferencias[linha][14];
+                switch (tipoIniciacao) {
+                    case 1:
+                    case 2:
+                    case 4:
+                        txtLinha += espacos(95);
+                        txtLinha += dadosTransferencias[linha][17];
+                        txtLinha += espacos(113 - trim(dadosTransferencias[linha][17]).length);
+                        break;
+                    case 3:
+                        txtLinha += espacos(208);
+                        break;
+                    case 5:
+                        txtLinha += espacos(95);
+                        txtLinha += zerosEsquerda(dadosTransferencias[linha][16], 2);
+                        txtLinha += espacos(111);
+                        break;
+                    default:
+                        pintaCelula('Transferências', linha, 14, 1);
+                        abend('Tipo de iniciação Pix inválido.');
+                }
+            }**/
+
+            // Logradouro + número + complemento (33 a 82)
+            txtLinha += '                              00000               ';
+            txtLinha += " ".repeat(35);     // Bairro + cidade (83 a 117)
+            txtLinha += '00000     ';     // CEP + estado (118 a 127)
+            txtLinha += " ".repeat(113) + "\n";     // Restante da linha
+            return txtLinha;
+        }
+        //
+        function zerosEsquerda(valor, tamanho) {
+            return String(valor).padStart(tamanho, '0');
+        }
+        //
+        function formatarDataDDMMAAAA(data) {
+            const dia = String(data.getDate()).padStart(2, '0');
+            const mes = String(data.getMonth() + 1).padStart(2, '0');
+            const ano = data.getFullYear();
+            return `${dia}${mes}${ano}`;
+        }
+        //
+        function extrairDadosTabela() {
+            const tabela = document.getElementById('tab-transf').getElementsByTagName('tbody')[0];
+            const linhas = tabela.getElementsByTagName('tr');
+            const dados = [];
+            for (let linha of linhas) {
+                const celulas = linha.cells;
+                const obj = {};
+                for (let i = 0; i < celulas.length; i++) {
+                    const elemento = celulas[i].querySelector('input, select');
+                    if (elemento) {
+                        const chave = elemento.name || `coluna${i}`; // usa name se existir, senão usa índice
+                        const valor = elemento.value.trim();
+                        obj[chave] = valor;
+                    }
+                }
+                dados.push(obj);
+            }
+            return dados;
+        }
+        //
+        function adicionarLinha(dados = null) {
+            const tabela = document.getElementById('tab-transf').getElementsByTagName('tbody')[0];
+            const novaLinha = tabela.insertRow();
+            const campos = [
+                { tipo: 'select', name: 'ehPix', options: ['Não', 'Telefone', 'e-mail', 'CPF/CNPJ', 'Ch.Aleat.', 'Dados banc.'] },
+                { tipo: 'select', name: 'ehSalario', options: ['Não', 'Sim'] },
+                { tipo: 'input', name: 'dtPgto', type: 'text', maxlength: 10 },
+                { tipo: 'input', name: 'vlPgto', type: 'number', step: '0.01', min: '0.01', max: '9999999999999.99' },
+                { tipo: 'select', name: 'tpConta', options: ['C/C', 'Poupança', 'Cta.Pgto.'] },
+                { tipo: 'input', name: 'cdCompe', type: 'tel', maxlength: 3 },
+                { tipo: 'input', name: 'cdIspb', type: 'tel', maxlength: 8 },
+                { tipo: 'input', name: 'nrAg', type: 'tel', maxlength: 5 },
+                { tipo: 'input', name: 'dvAg', type: 'tel', maxlength: 1 },
+                { tipo: 'input', name: 'nrConta', type: 'tel', maxlength: 9 },
+                { tipo: 'input', name: 'dvConta', type: 'tel', maxlength: 1 },
+                { tipo: 'select', name: 'tpFav', options: ['P.Física', 'P.Jurídica'] },
+                { tipo: 'input', name: 'cpfCnpjFav', type: 'text', maxlength: 14 },
+                { tipo: 'input', name: 'nomeFav', type: 'text', maxlength: 30 },
+                { tipo: 'input', name: 'nrDoc', type: 'text', maxlength: 20 },
+                { tipo: 'input', name: 'chavePix', type: 'text', maxlength: 99, disabled: true, style: 'background-color: #e0e0e0;' }
+            ];
+            let elementoEhPix = null;
+            campos.forEach((campo, i) => {
+                const celula = novaLinha.insertCell();
+                let elemento;
+                if (campo.tipo === 'select') {
+                    elemento = document.createElement('select');
+                    campo.options.forEach((opt, index) => {
+                        const option = document.createElement('option');
+                        option.value = index.toString();
+                        option.textContent = opt;
+                        elemento.appendChild(option);
+                    });
+                } else {
+                    elemento = document.createElement('input');
+                    elemento.type = campo.type;
+                    if (campo.maxlength) elemento.maxLength = campo.maxlength;
+                    if (campo.step) elemento.step = campo.step;
+                    if (campo.min) elemento.min = campo.min;
+                    if (campo.max) elemento.max = campo.max;
+                    if (campo.disabled) elemento.disabled = true;
+                    if (campo.style) elemento.style = campo.style;
+                }
+                elemento.name = campo.name;
+                elemento.setAttribute('onfocus', 'registrarCampoAtivo(this)');
+                if (campo.name === 'ehPix') {
+                    elemento.setAttribute('onchange', 'pixCampos(this)');
+                    elementoEhPix = elemento;
+                }
+                if (dados && dados.hasOwnProperty(campo.name)) {
+                    elemento.value = dados[campo.name]; // Preenche com valor do JSON, se existir
+                }
+                celula.appendChild(elemento);
+            });
+            /** TODO if (elementoEhPix && elementoEhPix.value !== "0" && elementoEhPix.value !== "5") {
+                console.log("ehPix está com valor 1 — ação personalizada aqui.");
+                const campoChavePix = novaLinha.querySelector('[name="chavePix"]');
+                if (campoChavePix) {
+                    campoChavePix.style.backgroundColor = ''; // remove cor personalizada
+                    campoChavePix.disabled = false; // opcional: habilita o campo
+                }
+            }*/
+            if (elementoEhPix && elementoEhPix.value !== "0" && elementoEhPix.value !== "5") {
+                console.log("ehPix está com valor 1 — ação personalizada aqui.");
+                const campoTpConta = novaLinha.querySelector('[name="tpConta"]');
+                if (campoTpConta) {
+                    campoTpConta.style.backgroundColor = 'e0e0e0';
+                    campoTpConta.disabled = true;
+                }
+                const campoCdCompe = novaLinha.querySelector('[name="cdCompe"]');
+                if (campoCdCompe) {
+                    campoCdCompe.style.backgroundColor = 'e0e0e0';
+                    campoCdCompe.disabled = true;
+                }
+                const campoCdIspb = novaLinha.querySelector('[name="cdIspb"]');
+                if (campoCdIspb) {
+                    campoCdIspb.style.backgroundColor = 'e0e0e0';
+                    campoCdIspb.disabled = true;
+                }
+                const campoNrAg = novaLinha.querySelector('[name="nrAg"]');
+                if (campoNrAg) {
+                    campoNrAg.style.backgroundColor = 'e0e0e0';
+                    campoNrAg.disabled = true;
+                }
+                const campoDvAg = novaLinha.querySelector('[name="dvAg"]');
+                if (campoDvAg) {
+                    campoDvAg.style.backgroundColor = 'e0e0e0';
+                    campoDvAg.disabled = true;
+                }
+                const campoNrConta = novaLinha.querySelector('[name="nrConta"]');
+                if (campoNrConta) {
+                    campoNrConta.style.backgroundColor = 'e0e0e0';
+                    campoNrConta.disabled = true;
+                }
+                const campoDvConta = novaLinha.querySelector('[name="dvConta"]');
+                if (campoDvConta) {
+                    campoDvConta.style.backgroundColor = 'e0e0e0';
+                    campoDvConta.disabled = true;
+                }
+                const campoChavePix = novaLinha.querySelector('[name="chavePix"]');
+                if (campoChavePix) {
+                    campoChavePix.style.backgroundColor = ''; // remove cor personalizada
+                    campoChavePix.disabled = false; // habilita o campo
+                }
+            }
+        }
+        //
+        function excluirLinha() {
+            if (!ultimoCampoAtivo) {
+                alert("Clique em um campo da linha que deseja excluir.");
+                return;
+            }
+            const linha = ultimoCampoAtivo.closest("tr");
+            if (linha && linha.parentElement.tagName === "TBODY") {
+                linha.remove();
+            } else {
+                alert("A linha selecionada não está no corpo da tabela.");
+            }
+        }
+        //
+        function handleCheckboxChange(event) {
+            const transf126 = document.getElementById('transf-126');
+            const transf128 = document.getElementById('transf-128');
+            const pix126 = document.getElementById('pix-126');
+            const pix128 = document.getElementById('pix-128');
+            // Exclusividade entre Fornecedores e Diversos
+            if (event.target.id === 'transf-126' && transf126.checked) { transf128.checked = false; }
+            if (event.target.id === 'transf-128' && transf128.checked) { transf126.checked = false; }
+            if (event.target.id === 'pix-126' && pix126.checked) { pix128.checked = false; }
+            if (event.target.id === 'pix-128' && pix128.checked) { pix126.checked = false; }
+        }
+        // Esconde outras seções
+        function toggleExclusive(header) {
+            const section = header.closest(".section");
+            document.querySelectorAll(".section .content").forEach(c => {
+                if (c !== section.querySelector(".content")) {
+                    c.classList.remove("open");
+                    c.closest(".section").querySelector(".toggle-icon").textContent = "➕";
+                }
+            });
+            const content = section.querySelector(".content");
+            const icon = header.querySelector(".toggle-icon");
+            content.classList.toggle("open");
+            //icon.textContent = content.classList.contains("open") ? "➖" : "➕";
+            if (content.classList.contains("open")) {
+                icon.textContent = "➖";
+                if (section.id == "transfSection") {
+                    const tabTransf = extrairDadosTabela();
+                    if (tabTransf.length == 0) { adicionarLinha() }
+                };
+            } else {
+                icon.textContent = "➕";
+            };
+        }
+        //
+        function validarTransf() {
+            /**
+             * coluna0  = Tipo Pgto.
+               coluna1  = Cód.Bco.(Compe)
+               coluna2  = Nº Ag. Fav.
+               coluna3  = DV Ag. Fav.
+               coluna4  = Nº Conta Fav.
+               coluna5  = DV Conta Fav.
+               coluna6  = Nome do Favorecido
+               coluna7  = Nº doc.atribuído pela empresa
+               coluna8  = Data do pagamento
+               coluna9  = Valor do pagamento
+               coluna10 = Tipo Pessoa Fav.
+               coluna11 = Nº CPF ou CNPJ Fav.
+             */
+            let resultadoValidacao = "";
+            let cntContaCorrenteBB = 0;
+            let cntPoupancaBB = 0;
+            let cntTed = 0;
+            let cntSalario = 0;
+            //
+            const dados = extrairDadosTabela();
+            console.table(dados);
+            return "TESTE";
+            if (dados.length === 0) {
+                resultadoValidacao += "Não há registros para modalidade 'Transferências'.\n";
+            }
+            dados.forEach((lnh, i) => {
+                if (lnh.ehPix == 1) {
+                    resultadoValidacao += `É pix. Registro [#${i + 1}].\n`
+                }
+                if (!validarNumerico(lnh.coluna1, 3)) {
+                    resultadoValidacao += `Cód.Bco.(Compe) - conteúdo inválido. Registro [#${i + 1}].\n`
+                }
+                if (!validarNumerico(lnh.coluna2, 5)) {
+                    resultadoValidacao += `Nº agência - conteúdo inválido. Registro [#${i + 1}].\n`
+                }
+                if (!validarNumerico(lnh.coluna4, 9)) {
+                    resultadoValidacao += `Nº conta - conteúdo inválido. Registro [#${i + 1}].\n`
+                }
+                let opcValidaDv = 1;
+                if (Number(lnh.coluna1) == 1) {
+                    opcValidaDv = 2 // Valida preenchimento e cálculo
+                }
+                if (!validarDV(opcValidaDv, lnh.coluna2, lnh.coluna3)) { // DV Agência
+                    resultadoValidacao += `DV agência - conteúdo inválido. Registro [#${i + 1}].\n`
+                }
+                if (!validarDV(opcValidaDv, lnh.coluna4, lnh.coluna5)) { // DV Conta
+                    resultadoValidacao += `DV conta - conteúdo inválido. Registro [#${i + 1}].\n`
+                }
+                // lnh.coluna6 = Nome do favorecido - não validado (campo opcional)
+                // lnh.coluna7 = Nº.doc.atr.empresa - não validado (campo opcional)
+                if (lnh.coluna8.length != 0) {
+                    if (!validarDataDDMMAAAA(lnh.coluna8)) {
+                        resultadoValidacao += `Data do pagamento - conteúdo inválido. Registro [#${i + 1}].\n`
+                    }
+                }
+                const regexMonetario = /^\d+([.,]\d{2})?$/;
+                if (!regexMonetario.test(lnh.coluna9) || parseFloat(lnh.coluna9) > 9999999999999.99) {
+                    resultadoValidacao += `Valor do pagamento - conteúdo inválido. Registro [#${i + 1}].\n`
+                }
+                if (!validarCpfCnpj(lnh.coluna10, lnh.coluna11)) {
+                    resultadoValidacao += `CPF/CNPJ - conteúdo inválido. Registro [#${i + 1}].\n`
+                };
+                // Contadores
+                if (lnh.coluna0 == 1) {
+                    cntSalario += 1
+                } else {
+                    if (Number(lnh.coluna1) == 1) {
+                        if (lnh.coluna4.length == 9 && Number(lnh.coluna4.substring(0, 2)) > 9) {
+                            cntPoupancaBB += 1
+                        } else {
+                            cntContaCorrenteBB += 1
+                        }
+                    } else {
+                        cntTed += 1
+                    }
+                }
+            });
+            sessionStorage.setItem("cntContaCorrenteBB", cntContaCorrenteBB);
+            sessionStorage.setItem("cntPoupancaBB", cntPoupancaBB);
+            sessionStorage.setItem("cntTed", cntTed);
+            sessionStorage.setItem("cntSalario", cntSalario);
+            //
+            const validationIcon = document.getElementById('validation-icon2');
+            if (resultadoValidacao == "") {
+                validationIcon.textContent = '✔️';
+                validationIcon.style.color = 'green';
+            } else {
+                validationIcon.textContent = '❌';
+                validationIcon.style.color = 'red';
+            }
+            //
+            return resultadoValidacao;
+        }
+        //
+        function validarNumerico(valor, tamanho) {
+            if (isNaN(valor) || valor.length == 0 || valor.length > tamanho) {
+                return false;
+            }
+            return true
+        }
+        //
+        function validarDV(opcao, numero, Dv) {
+            // opcao = 1: Só preenchimento | 2: Preenchimento e cálculo
+            if ((Dv != "X" && Dv != "x") && (isNaN(Dv) || Dv.length != 1)) {
+                return false;
+            }
+            if (Number(opcao) == 2) {
+                if (numero.length > 9) {
+                    console.warn("Inválido - mais de 9 dígitos")
+                    return false;
+                }
+                // Remove caracteres não numéricos
+                const nr = numero.replace(/\D/g, '');
+                const pesos = [2, 3, 4, 5, 6, 7, 8, 9, 2]; // Aplica pesos de 2 a 9 da direita para a esquerda
+                let soma = 0;
+                for (let i = 0; i < nr.length; i++) { // Aplica os pesos da direita para a esquerda
+                    const digito = parseInt(nr[nr.length - 1 - i], 10);
+                    const peso = pesos[i % pesos.length];
+                    soma += digito * peso;
+                }
+                const resto = soma % 11;
+                let digitoCalculado;
+                switch (resto) {
+                    case 0:
+                        digitoCalculado = '0';
+                        break;
+                    case 1:
+                        digitoCalculado = 'X';
+                        break;
+                    default:
+                        digitoCalculado = String(11 - resto);
+                        break;
+                }
+                return digitoCalculado.toUpperCase() === Dv.toUpperCase();
+            }
+            return true
+        }
+        //
+        function validarCpfCnpj(tipo, cpfCnpj) {
+            switch (Number(tipo)) {
+                case 1:
+                    cpfCnpj = cpfCnpj.replace(/\D/g, ''); // Remove tudo que não for número    
+                    if (cpfCnpj.length !== 11) { cpfCnpj = zerosEsquerda(cpfCnpj, 11) }
+                    break;
+                case 2:
+                    cpfCnpj = cpfCnpj.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    if (cpfCnpj.length !== 14) { cpfCnpj = zerosEsquerda(cpfCnpj, 14) }
+                    break;
+                default:
+                    console.warn(`CPF/CNPJ - Tipo de inscrição inválido. [${tipo}]`);
+                    return false;
+                    break;
+            }
+            if (Number(tipo) == 1) {
+                cpfCnpj = cpfCnpj.replace(/\D/g, ''); // Remove tudo que não for número
+                if (/^(\d)\1{10}$/.test(cpfCnpj)) return false; // Elimina CPFs com todos os dígitos iguais
+                let soma = 0; // Valida primeiro dígito verificador
+                for (let i = 0; i < 9; i++) {
+                    soma += parseInt(cpfCnpj.charAt(i)) * (10 - i);
+                }
+                let resto = (soma * 10) % 11;
+                if (resto === 10 || resto === 11) resto = 0;
+                if (resto !== parseInt(cpfCnpj.charAt(9))) return false;
+                soma = 0; // Valida segundo dígito verificador
+                for (let i = 0; i < 10; i++) {
+                    soma += parseInt(cpfCnpj.charAt(i)) * (11 - i);
+                }
+                resto = (soma * 10) % 11;
+                if (resto === 10 || resto === 11) resto = 0;
+                if (resto !== parseInt(cpfCnpj.charAt(10))) return false;
+                return true;
+            } else {
+                const pesos = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+                const c = cpfCnpj.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                if (c.length !== 14 || /^0{14}$/.test(c)) return false;
+                const valorChar = char => (char >= 'A' ? char.charCodeAt(0) - 48 : parseInt(char));
+                const calcularDV = pos => {
+                    const soma = c.slice(0, pos).split('').reduce((acc, char, i) => {
+                        return acc + valorChar(char) * pesos[i + (pos === 12 ? 1 : 0)];
+                    }, 0);
+                    const resto = soma % 11;
+                    return (resto < 2 ? 0 : 11 - resto);
+                };
+                return calcularDV(12) === parseInt(c[12]) && calcularDV(13) === parseInt(c[13]);
+            }
+        }
+        //
+        function validarDataDDMMAAAA(input) {
+            // Remove tudo que não for número
+            let numeros = input.replace(/\D/g, '');
+            // Preenche com zeros à esquerda até 8 dígitos
+            numeros = numeros.padStart(8, '0');
+            // Extrai dia, mês e ano
+            const dia = parseInt(numeros.slice(0, 2), 10);
+            const mes = parseInt(numeros.slice(2, 4), 10);
+            const ano = parseInt(numeros.slice(4, 8), 10);
+            // Verifica se os valores são válidos
+            if (dia < 1 || dia > 31 || mes < 1 || mes > 12 || ano < 1000 || ano > 9999) {
+                return false;
+            }
+            // Cria objeto Date e verifica se é uma data real
+            const data = new Date(ano, mes - 1, dia);
+            return (
+                data.getFullYear() === ano &&
+                data.getMonth() === mes - 1 &&
+                data.getDate() === dia
+            );
+        }
+        //
+        function dataHoje() {
+            // Data atual no formato: DDMMAAAA
+            const dataAtual = new Date();
+            const dataBrasil = new Date(dataAtual.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+            const doisDigitos = (num) => String(num).padStart(2, '0');
+            const ano = dataBrasil.getFullYear();
+            const mes = doisDigitos(dataBrasil.getMonth() + 1);
+            const dia = doisDigitos(dataBrasil.getDate());
+            const dataFormatada = `${dia}${mes}${ano}`;
+            return dataFormatada;
+        }
+        //
+        function limparTexto(texto) {
+            let textoLimpo = texto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Remove acentuação
+            textoLimpo = textoLimpo.replace(/[^a-zA-Z0-9\s]/g, ""); // Remove caracteres especiais (exceto letras e números)
+            return textoLimpo;
+        }
+        //
+        function registrarCampoAtivo(elemento) {
+            ultimoCampoAtivo = elemento;
+        }
+        //
+        function pixCampos(elementoAlterado) {
+            const linha = elementoAlterado.closest('tr');
+            const tpPix = linha.querySelector('select[name="ehPix"]');
+            const valorTpPix = Number(tpPix.value);
+            const tpConta = linha.querySelector('select[name="tpConta"]');
+            const cdCompe = linha.querySelector('input[name="cdCompe"]');
+            const cdIspb = linha.querySelector('input[name="cdIspb"]');
+            const nrAg = linha.querySelector('input[name="nrAg"]');
+            const dvAg = linha.querySelector('input[name="dvAg"]');
+            const nrConta = linha.querySelector('input[name="nrConta"]');
+            const dvConta = linha.querySelector('input[name="dvConta"]');
+            const chavePix = linha.querySelector('input[name="chavePix"]');
+            let ligaCampos = false;
+            if (chavePix) { chavePix.disabled = false; chavePix.style.backgroundColor = ''; };
+            switch (valorTpPix) {
+                case 0: // Não é Pix
+                    ligaCampos = true; if (chavePix) { chavePix.disabled = true; chavePix.style.backgroundColor = '#e0e0e0'; }; break;
+                case 1: // Telefone
+                case 2: // e-mail
+                case 3: // CPF/CNPJ
+                case 4: // Chave aleatória
+                    ligaCampos = false; break;
+                case 5: // Dados bancários
+                    ligaCampos = true; if (chavePix) { chavePix.disabled = true; chavePix.style.backgroundColor = '#e0e0e0'; }; break;
+                default: break;
+            };
+            if (ligaCampos) {
+                if (tpConta) { tpConta.disabled = false; tpConta.style.backgroundColor = ''; };
+                if (cdCompe) { cdCompe.disabled = false; cdCompe.style.backgroundColor = ''; };
+                if (cdIspb) { cdIspb.disabled = false; cdIspb.style.backgroundColor = ''; };
+                if (nrAg) { nrAg.disabled = false; nrAg.style.backgroundColor = ''; };
+                if (dvAg) { dvAg.disabled = false; dvAg.style.backgroundColor = ''; };
+                if (nrConta) { nrConta.disabled = false; nrConta.style.backgroundColor = ''; };
+                if (dvConta) { dvConta.disabled = false; dvConta.style.backgroundColor = ''; };
+            } else {
+                if (tpConta) { tpConta.disabled = true; tpConta.style.backgroundColor = '#e0e0e0'; };
+                if (cdCompe) { cdCompe.disabled = true; cdCompe.style.backgroundColor = '#e0e0e0'; };
+                if (cdIspb) { cdIspb.disabled = true; cdIspb.style.backgroundColor = '#e0e0e0'; };
+                if (nrAg) { nrAg.disabled = true; nrAg.style.backgroundColor = '#e0e0e0'; };
+                if (dvAg) { dvAg.disabled = true; dvAg.style.backgroundColor = '#e0e0e0'; };
+                if (nrConta) { nrConta.disabled = true; nrConta.style.backgroundColor = '#e0e0e0'; };
+                if (dvConta) { dvConta.disabled = true; dvConta.style.backgroundColor = '#e0e0e0'; };
+            }
+        }
+        //
+        function limparTransf(comUmaLinha = null) {
+            const resposta = confirm("ATENÇÃO: Isso vai apagar todos os dados. Confirma?");
+            if (resposta) {
+                const tabela = document.querySelector('#tab-transf tbody');
+                if (tabela) tabela.innerHTML = ''; // Remove todas as linhas
+                if (comUmaLinha) adicionarLinha();
+            } else {
+                console.log("Usuário cancelou.");
+            }
+        }
+        //
+        function impTransf() {
+            limparTransf(false); // false - limpa todas as linhas
+            lerTransf();
+            /**adicionarLinha({
+                ehPix: "3",
+                ehSalario: "0",
+                dtPgto: "13/09/2025",
+                vlPgto: "100.00",
+                tpConta: "2",
+                cdCompe: "001",
+                cdIspb: "12345678",
+                nrAg: "1234",
+                dvAg: "5",
+                nrConta: "987654321",
+                dvConta: "0",
+                tpFav: "1",
+                cpfCnpjFav: "12345678901",
+                nomeFav: "João da Silva",
+                nrDoc: "DOC123",
+                chavePix: "joao@email.com"
+            });
+            adicionarLinha({
+                ehPix: "0",
+                ehSalario: "0",
+                dtPgto: "13/09/2025",
+                vlPgto: "100.00",
+                tpConta: "2",
+                cdCompe: "001",
+                cdIspb: "12345678",
+                nrAg: "1234",
+                dvAg: "5",
+                nrConta: "987654321",
+                dvConta: "0",
+                tpFav: "1",
+                cpfCnpjFav: "12345678901",
+                nomeFav: "João da Silva",
+                nrDoc: "DOC123",
+                chavePix: "joao@email.com"
+            });*/
+        }
+
+    </script>
+</body>
+
+</html>
