@@ -356,6 +356,10 @@
     </div>
 
     <button id="btnGravarRemessa" onclick="gravarRemessa()">💾 Gravar Remessa</button>
+    <footer
+        style="text-align: center; margin-top: 40px; padding: 10px; background-color: #eaeaea; border-top: 1px solid #ccc; font-size: 14px; color: #555;">
+        Desenvolvido por Fabio do Amaral Carvalho
+    </footer>
 
     <script>
         let ultimoCampoAtivo = null;
@@ -411,6 +415,12 @@
                         alerta("Marque somente um: 'Transferências/Fornecedores' ou 'Transferências/Diversos'");
                     }
                     let resultadoValidacao = validarTransf() // Validações TRANSFERÊNCIAS
+                    // TODO retirar console
+                    console.log( "cntContaCorrenteBB: " + sessionStorage.getItem("cntContaCorrenteBB") )
+                    console.log( "cntPoupancaBB: " + sessionStorage.getItem("cntPoupancaBB") )
+                    console.log( "cntTed: " + sessionStorage.getItem("cntTed") )
+                    console.log( "cntSalario: " + sessionStorage.getItem("cntSalario") )
+                    console.log( "cntPix: " + sessionStorage.getItem("cntPix") )
                     if (resultadoValidacao === "") {
                         ok = true
                         cntValidados += 1
@@ -1079,88 +1089,75 @@
         }
         //
         function validarTransf() {
-            /**
-             * coluna0  = Tipo Pgto.
-               coluna1  = Cód.Bco.(Compe)
-               coluna2  = Nº Ag. Fav.
-               coluna3  = DV Ag. Fav.
-               coluna4  = Nº Conta Fav.
-               coluna5  = DV Conta Fav.
-               coluna6  = Nome do Favorecido
-               coluna7  = Nº doc.atribuído pela empresa
-               coluna8  = Data do pagamento
-               coluna9  = Valor do pagamento
-               coluna10 = Tipo Pessoa Fav.
-               coluna11 = Nº CPF ou CNPJ Fav.
-             */
             let resultadoValidacao = "";
             let cntContaCorrenteBB = 0;
             let cntPoupancaBB = 0;
             let cntTed = 0;
             let cntSalario = 0;
+            let cntPix = 0;
             //
             const dados = extrairDadosTabela();
+            // TODO retirar console
             console.table(dados);
-            return "TESTE";
             if (dados.length === 0) {
                 resultadoValidacao += "Não há registros para modalidade 'Transferências'.\n";
             }
             dados.forEach((lnh, i) => {
-                if (lnh.ehPix == 1) {
-                    resultadoValidacao += `É pix. Registro [#${i + 1}].\n`
-                }
-                if (!validarNumerico(lnh.coluna1, 3)) {
-                    resultadoValidacao += `Cód.Bco.(Compe) - conteúdo inválido. Registro [#${i + 1}].\n`
-                }
-                if (!validarNumerico(lnh.coluna2, 5)) {
-                    resultadoValidacao += `Nº agência - conteúdo inválido. Registro [#${i + 1}].\n`
-                }
-                if (!validarNumerico(lnh.coluna4, 9)) {
-                    resultadoValidacao += `Nº conta - conteúdo inválido. Registro [#${i + 1}].\n`
-                }
-                let opcValidaDv = 1;
-                if (Number(lnh.coluna1) == 1) {
-                    opcValidaDv = 2 // Valida preenchimento e cálculo
-                }
-                if (!validarDV(opcValidaDv, lnh.coluna2, lnh.coluna3)) { // DV Agência
-                    resultadoValidacao += `DV agência - conteúdo inválido. Registro [#${i + 1}].\n`
-                }
-                if (!validarDV(opcValidaDv, lnh.coluna4, lnh.coluna5)) { // DV Conta
-                    resultadoValidacao += `DV conta - conteúdo inválido. Registro [#${i + 1}].\n`
-                }
-                // lnh.coluna6 = Nome do favorecido - não validado (campo opcional)
-                // lnh.coluna7 = Nº.doc.atr.empresa - não validado (campo opcional)
-                if (lnh.coluna8.length != 0) {
-                    if (!validarDataDDMMAAAA(lnh.coluna8)) {
+                if (lnh.ehPix != "0") { cntPix += 1; }
+                if (lnh.ehSalario == "1") { cntSalario += 1 }
+                if (lnh.dtPgto.length != 0) {
+                    if (!validarDataDDMMAAAA(lnh.dtPgto)) {
                         resultadoValidacao += `Data do pagamento - conteúdo inválido. Registro [#${i + 1}].\n`
                     }
                 }
                 const regexMonetario = /^\d+([.,]\d{2})?$/;
-                if (!regexMonetario.test(lnh.coluna9) || parseFloat(lnh.coluna9) > 9999999999999.99) {
+                if (!regexMonetario.test(lnh.vlPgto) || parseFloat(lnh.vlPgto) > 9999999999999.99) {
                     resultadoValidacao += `Valor do pagamento - conteúdo inválido. Registro [#${i + 1}].\n`
                 }
-                if (!validarCpfCnpj(lnh.coluna10, lnh.coluna11)) {
-                    resultadoValidacao += `CPF/CNPJ - conteúdo inválido. Registro [#${i + 1}].\n`
-                };
-                // Contadores
-                if (lnh.coluna0 == 1) {
-                    cntSalario += 1
-                } else {
-                    if (Number(lnh.coluna1) == 1) {
-                        if (lnh.coluna4.length == 9 && Number(lnh.coluna4.substring(0, 2)) > 9) {
+                if (lnh.ehPix == "0" || lnh.ehPix == "5") {  // Se não for Pix ou se for Pix dados banc.: Valida dados bancários
+                    if (Number(lnh.cdBanco) == 1 || Number(lnh.cdIspb == 0)) { // Se banco dest. = BB, verifica conta poupança
+                        if (lnh.nrConta.length == 9 && Number(lnh.nrConta.substring(0, 2)) > 9) {
+                            if (lnh.tpConta != "Poupança") {
+                                resultadoValidacao += `Conta informada é de poupança. Registro [#${i + 1}].\n`
+                            }
                             cntPoupancaBB += 1
                         } else {
                             cntContaCorrenteBB += 1
                         }
                     } else {
-                        cntTed += 1
+                        if (lnh.ehPix == "0") { cntTed += 1 };
+                    }
+                    if (!validarNumerico(lnh.cdCompe, 3)) {
+                        resultadoValidacao += `Cód.Bco.(Compe) - conteúdo inválido. Registro [#${i + 1}].\n`
+                    }
+                    if (!validarNumerico(lnh.nrAg, 5)) {
+                        resultadoValidacao += `Nº agência - conteúdo inválido. Registro [#${i + 1}].\n`
+                    }
+                    if (!validarNumerico(lnh.nrConta, 9)) {
+                        resultadoValidacao += `Nº conta - conteúdo inválido. Registro [#${i + 1}].\n`
+                    }
+                    let opcValidaDv = 1;
+                    if (Number(lnh.cdBanco) == 1 || Number(lnh.cdIspb == 0)) {   // Se for BB, valida e calcula (opcValida = 2)
+                        opcValidaDv = 2                                          // Valida preenchimento e cálculo
+                    }
+                    if (!validarDV(opcValidaDv, lnh.nrAg, lnh.dvAg)) { // DV Agência
+                        resultadoValidacao += `DV agência - conteúdo inválido. Registro [#${i + 1}].\n`
+                    }
+                    if (!validarDV(opcValidaDv, lnh.nrConta, lnh.dvConta)) { // DV Conta
+                        resultadoValidacao += `DV conta - conteúdo inválido. Registro [#${i + 1}].\n`
                     }
                 }
+                // lnh.nomeFav = Nome do favorecido - não validado (campo opcional)
+                // lnh.nrDoc = Nº.doc.atr.empresa - não validado (campo opcional)
+                if (!validarCpfCnpj(lnh.tpFav, lnh.cpfCnpjFav)) {
+                    resultadoValidacao += `CPF/CNPJ - conteúdo inválido. Registro [#${i + 1}].\n`
+                };
             });
             sessionStorage.setItem("cntContaCorrenteBB", cntContaCorrenteBB);
             sessionStorage.setItem("cntPoupancaBB", cntPoupancaBB);
             sessionStorage.setItem("cntTed", cntTed);
             sessionStorage.setItem("cntSalario", cntSalario);
+            sessionStorage.setItem("cntPix", cntPix);
             //
             const validationIcon = document.getElementById('validation-icon2');
             if (resultadoValidacao == "") {
